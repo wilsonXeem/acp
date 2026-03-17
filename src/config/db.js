@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 
-const cached = global.__acpMongoose || { conn: null, promise: null };
+if (!global.__acpMongoose) {
+  global.__acpMongoose = { conn: null, promise: null };
+}
+const cached = global.__acpMongoose;
 
 module.exports = async function connectDB() {
   const uri = process.env.MONGODB_URI;
@@ -12,11 +15,13 @@ module.exports = async function connectDB() {
 
   if (!cached.promise) {
     mongoose.set('strictQuery', true);
-    cached.promise = mongoose.connect(uri).then((mongooseInstance) => mongooseInstance);
+    cached.promise = mongoose.connect(uri, {
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 30000,
+    }).then((m) => m);
   }
 
   cached.conn = await cached.promise;
-  global.__acpMongoose = cached;
 
   const { host, port, name } = cached.conn.connection;
   console.log(`MongoDB connected: ${host}${port ? `:${port}` : ''}/${name}`);
