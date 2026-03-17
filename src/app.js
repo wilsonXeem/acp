@@ -14,6 +14,10 @@ app.use(cors({ origin: corsOrigin }));
 app.use(express.json());
 app.use(morgan('dev'));
 
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', message: 'ACP Investment API is running', version: '0.1.0' });
+});
+
 app.get('/health', (req, res) => {
   res.json({ ok: true });
 });
